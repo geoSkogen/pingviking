@@ -28,8 +28,7 @@ class SitemapScraper {
     $this->site_www_origin = $site_origin_slugs[0] . '//www.' . $site_origin_slugs[1];
 
     if ($this->getSitemapContent()) {
-      $this->sitemap_dom_object = new DOMDocument();
-      $this->sitemap_dom_object->loadHTML($this->sitemap_content);
+
       $this->parseSitemap($parse_mode);
     }
   }
@@ -65,9 +64,11 @@ class SitemapScraper {
   }
 
   protected function parseSitemap($mode) {
-    if ($this->sitemap_dom_object) {
+    if ($this->sitemap_content) {
       switch($mode) {
         case 'HTML' :
+          $this->sitemap_dom_object = new DOMDocument();
+          $this->sitemap_dom_object->loadHTML($this->sitemap_content);
         // Use the HTML sitemap for the main site -- in order to connect to schools and departments
           $h2s = $this->sitemap_dom_object->getElementsByTagName('h2');
           $this->sitemap_list_object = $h2s[0]->nextElementSibling->getElementsByTagName('a');
@@ -87,11 +88,19 @@ class SitemapScraper {
           }
           break;
         case 'XML' :
-          $tbody = $this->sitemap_dom_object->getElementsByTagName('tbody');
-          $this->sitemap_list_object = $tbody[0]->getElementsByTagName('a');
-          for ($i = 0; $i < $this->sitemap_list_object->length; $i++) {
-            $this_url = $this->sitemap_list_object[$i]->attributes->getNamedItem('href')->value;
-            $this->page_urls[] = $this_url;
+          try {
+            print($this->sitemap_content);
+            $this->sitemap_dom_object = new SimpleXMLElement($this->sitemap_content);
+
+            if ($this->sitemap_dom_object->url) {
+              foreach ($this->sitemap_dom_object->url as $url) {
+                print_r($url->loc->__toString());
+                $this->page_urls[] = $url->loc->__toString();
+              }
+            }
+          } catch (Exception $e) {
+            error_log( $e->getMessage() );
+            continue;
           }
           break;
         default:
