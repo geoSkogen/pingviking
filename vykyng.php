@@ -9,32 +9,50 @@ $sitemap_filename = $argv[2] ? '/' .  $argv[2] : '/sitemap.xml';
 $parse_mode = $argv[3] ? $argv[3] : 'XML';
 
 $entity_inventory = new EntityInventory();
-
+/*
 $class_import_schema = new Schema('pdxd8_classnames','../imports');
 $class_names = [];
 
 foreach($class_import_schema->data_index as $row) {
   $class_names[] = $row[0];
 }
+*/
 
-$dom_scraper = new DOMScraper($class_names);
+$domains_import_schema = new Schema('pdxd8_domains','../imports');
+//$charsets_import_schema = new Schema('charset_ranges','../imports');
 
-$sitemap_scraper = new SitemapScraper('https://' . $site_domain,$sitemap_filename, null, $parse_mode);
+//$dom_scraper = new DOMScraper();
 
-$html_strings_by_page_url = $sitemap_scraper->getPageContentAll();
-//$sub_sitemap_urls_all = $sitemap_scraper->parseSitemapsAll($subsite_urls);
-//print_r($sub_sitemap_urls_all);
+foreach($domains_import_schema->data_index as $domain_row) {
 
-foreach($html_strings_by_page_url as $url => $page_content) {
+  $sitemap_scraper = new SitemapScraper('https://' . $domain_row[0],$sitemap_filename, null, $parse_mode);
 
-  $entity_inventory->tally(
-    $dom_scraper->getPageInventory($page_content),
-  );
+  //$html_strings_by_page_url = $sitemap_scraper->getPageContentAll();
+  /*
+  foreach($html_strings_by_page_url as $url => $page_content) {
+
+    $entity_inventory->flattenTally(
+      $url,
+      $dom_scraper->getCharsetInventory($page_content,$charsets_import_schema->data_index),
+    );
+  }
+  print_r($entity_inventory->getExportTable());
+  */
+  /*
+  foreach($html_strings_by_page_url as $url => $page_content) {
+
+    $entity_inventory->tally(
+      $dom_scraper->getClassNamesInventory($page_content,$class_names),
+    );
+  }
+  */
+  $export_str = Schema::make_export_str( $sitemap_scraper->getPageURLs() );
+  print("exporting URLs for {$domain_row[0]}\r\n");
+  Schema::export_csv($export_str,  str_replace(['pdx.edu/','www.'],'',$domain_row[0]) . '_page_inventory', '../exports/sitemaps');
 }
 
-$export_str = Schema::make_export_str( $entity_inventory->getExportTable() );
 
-Schema::export_csv($export_str,  str_replace('pdx.edu/','',$site_domain) . '_pdxd8_class_inventory', '../exports');
+
 
 
 ?>

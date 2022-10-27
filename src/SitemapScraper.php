@@ -57,6 +57,7 @@ class SitemapScraper {
     } catch (RequestException $e) {
       if ($e->hasResponse()) {
         $err_response = $e->hasResponse();
+        error_log('HTTP request returned an error');
         error_log($err_response);
       }
     }
@@ -89,16 +90,17 @@ class SitemapScraper {
           break;
         case 'XML' :
           try {
-            print($this->sitemap_content);
+            //print($this->sitemap_content);
             $this->sitemap_dom_object = new SimpleXMLElement($this->sitemap_content);
 
             if ($this->sitemap_dom_object->url) {
               foreach ($this->sitemap_dom_object->url as $url) {
-                print_r($url->loc->__toString());
+                //print_r($url->loc->__toString());
                 $this->page_urls[] = $url->loc->__toString();
               }
             }
           } catch (Exception $e) {
+            error_log('sitemap request returned invalid XML');
             error_log( $e->getMessage() );
             continue;
           }
@@ -133,7 +135,19 @@ class SitemapScraper {
       $response = $this->getResponse($page_url);
       if ($response) {
         $this->page_content_arr[$page_url] = $response;
-        print($response);
+        print("Got response from {$page_url}");
+      }
+    }
+    return $this->page_content_arr;
+  }
+
+  public function getPageContentByPaths($paths_arr) {
+    foreach( $paths_arr as $page_path) {
+      $page_url = $this->site_origin . $page_path;
+      $response = $this->getResponse($page_url);
+      if ($response) {
+        $this->page_content_arr[$page_url] = $response;
+        //print($response);
       }
     }
     return $this->page_content_arr;
@@ -162,7 +176,7 @@ class SitemapScraper {
             continue;
           }
         }
-      print_r($response);
+      //print_r($response);
       }
     }
     return $this->sitemap_urls;
