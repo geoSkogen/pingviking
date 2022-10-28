@@ -3,6 +3,8 @@
 class EntityInventory {
 
   protected $inventory;
+  protected $table;
+  protected $total_pages_crawled;
 
   public function __construct() {
     $this->inventory = [];
@@ -16,6 +18,7 @@ class EntityInventory {
       $this->inventory[$item_type] = empty($this->inventory[$item_type]) ? intval($count) :
         intval($this->inventory[$item_type]) + intval($count);
     }
+    //print_r($this->inventory);
     $this->total_pages_crawled++;
   }
 
@@ -34,9 +37,12 @@ class EntityInventory {
     return $this->table;
   }
 
-  public function getExportTable() {
-    //$export_arr = $this->makeExportTable();
-    $export_arr = $this->table;
+  public function getExportTable($get_new) {
+    if ($get_new) {
+      $export_arr = $this->makeExportTable();
+    } else {
+      $export_arr = $this->table;
+    }
     $export_arr[] = ['TOTAL PAGES CRAWLED',$this->total_pages_crawled];
     return $export_arr;
   }

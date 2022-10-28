@@ -1,21 +1,20 @@
 <?php
 
-
 class DOMScraper {
 
-  protected $class_names = [];
-
-  protected $class_inventory = [];
-
-  public $unicode_ranges_by_charset_name = [];
+  protected $class_names;
+  protected $class_inventory;
+  public $unicode_ranges_by_charset_name;
 
   public function __construct() {
-
+    $this->class_inventory = [];
+    $this->class_names = [];
+    $this->unicode_ranges_by_charset_name = [];
   }
 
   protected function inventoryClassNames($html_string) {
     foreach ($this->class_names as $class_name) {
-      $this->inventory[$class_name] = strpos($html_string,$class_name) ? 1 : 0;
+      $this->class_inventory[$class_name] = strpos($html_string,$class_name) ? 1 : 0;
     }
     return $this->class_inventory;
   }

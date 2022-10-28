@@ -135,7 +135,7 @@ class SitemapScraper {
       $response = $this->getResponse($page_url);
       if ($response) {
         $this->page_content_arr[$page_url] = $response;
-        print("Got response from {$page_url}");
+        print("\r\ngot HTTP response from {$page_url}\r\n");
       }
     }
     return $this->page_content_arr;
@@ -147,7 +147,7 @@ class SitemapScraper {
       $response = $this->getResponse($page_url);
       if ($response) {
         $this->page_content_arr[$page_url] = $response;
-        //print($response);
+        print("\r\ngot HTTP response from {$page_url}\r\n");
       }
     }
     return $this->page_content_arr;
